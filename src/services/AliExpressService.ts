@@ -7,9 +7,22 @@ export interface Product {
 }
 
 export class AliExpressService {
+  private static techKeywords = [
+    "smartphone",
+    "laptop",
+    "headphones",
+    "smartwatch",
+    "tablet",
+    "earbuds",
+    "power bank",
+    "charger",
+    "camera",
+    "speaker"
+  ];
+
   static async searchProducts(searchTerm: string): Promise<Product[]> {
-    // Here we'll implement the actual AliExpress API integration
-    // For now, returning mock data
+    // כאן תהיה האינטגרציה עם ה-API של AliExpress
+    // כרגע מחזיר נתונים לדוגמה
     return [
       {
         id: "1",
@@ -19,6 +32,17 @@ export class AliExpressService {
         productUrl: "https://aliexpress.com/item/1",
       },
     ];
+  }
+
+  static async searchRandomTechProduct(): Promise<Product | null> {
+    const randomKeyword = this.techKeywords[Math.floor(Math.random() * this.techKeywords.length)];
+    try {
+      const products = await this.searchProducts(randomKeyword);
+      return products.length > 0 ? products[0] : null;
+    } catch (error) {
+      console.error("Error searching for tech product:", error);
+      return null;
+    }
   }
 
   static formatProductMessage(product: Product): string {

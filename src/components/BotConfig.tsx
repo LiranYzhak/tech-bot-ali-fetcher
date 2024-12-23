@@ -2,16 +2,19 @@ import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/components/ui/use-toast";
 import { Label } from "@/components/ui/label";
+import { useToast } from "@/components/ui/use-toast";
+import { Switch } from "@/components/ui/switch";
+import { AutoPostService } from "@/services/AutoPostService";
+import { TelegramService } from "@/services/TelegramService";
 
 export const BotConfig = () => {
   const [botToken, setBotToken] = useState("");
   const [groupId, setGroupId] = useState("");
   const [affiliateLink, setAffiliateLink] = useState("");
+  const [autoPostEnabled, setAutoPostEnabled] = useState(false);
   const { toast } = useToast();
 
-  // Load saved values on component mount
   useEffect(() => {
     const savedBotToken = localStorage.getItem("botToken");
     const savedGroupId = localStorage.getItem("groupId");
@@ -21,6 +24,23 @@ export const BotConfig = () => {
     if (savedGroupId) setGroupId(savedGroupId);
     if (savedAffiliateLink) setAffiliateLink(savedAffiliateLink);
   }, []);
+
+  useEffect(() => {
+    if (autoPostEnabled) {
+      TelegramService.initialize();
+      AutoPostService.startAutoPosting();
+      toast({
+        title: "פרסום אוטומטי הופעל",
+        description: "הבוט יפרסם מוצר חדש כל 10 דקות",
+      });
+    } else {
+      AutoPostService.stopAutoPosting();
+    }
+
+    return () => {
+      AutoPostService.stopAutoPosting();
+    };
+  }, [autoPostEnabled, toast]);
 
   const handleSave = () => {
     if (!botToken || !groupId) {
@@ -84,6 +104,15 @@ export const BotConfig = () => {
             placeholder="הכנס את קישור השותפים שלך"
             className="transition-all duration-200"
           />
+        </div>
+
+        <div className="flex items-center space-x-2">
+          <Switch
+            id="autoPost"
+            checked={autoPostEnabled}
+            onCheckedChange={setAutoPostEnabled}
+          />
+          <Label htmlFor="autoPost">פרסום אוטומטי כל 10 דקות</Label>
         </div>
 
         <Button
