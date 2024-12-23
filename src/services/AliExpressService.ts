@@ -45,17 +45,35 @@ export class AliExpressService {
     }
   }
 
+  private static convertToILS(usdPrice: string): string {
+    // מחיר בדולרים מגיע בפורמט "$XX.XX"
+    const usdAmount = parseFloat(usdPrice.replace('$', ''));
+    const ilsAmount = usdAmount * 3.7; // המרה משוערכת לשקלים
+    return `₪${ilsAmount.toFixed(2)}`;
+  }
+
+  private static translateTitle(title: string): string {
+    // בעתיד ניתן להוסיף כאן אינטגרציה עם שירות תרגום
+    // כרגע מחזיר את הכותרת המקורית
+    return title;
+  }
+
   static formatProductMessage(product: Product): string {
     const affiliateLink = localStorage.getItem("affiliateLink");
     const productUrlWithAffiliate = affiliateLink 
       ? `${product.productUrl}?${affiliateLink}`
       : product.productUrl;
 
-    return `
-🔥 <b>${product.title}</b>
+    const hebrewTitle = this.translateTitle(product.title);
+    const ilsPrice = this.convertToILS(product.price);
 
-💰 מחיר: ${product.price}
-🛒 <a href="${productUrlWithAffiliate}">לרכישה</a>
+    return `
+🎯 מוצר טכנולוגי חדש!
+
+📱 ${hebrewTitle}
+
+💰 מחיר: ${ilsPrice}
+🌟 קישור לרכישה: ${productUrlWithAffiliate}
 
 #TechDeals #AliExpress
     `.trim();

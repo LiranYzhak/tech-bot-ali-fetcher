@@ -18,7 +18,6 @@ export class TelegramService {
     this.botToken = botToken;
     this.groupId = groupId;
 
-    // Set up bot commands
     this.setupBotCommands();
   }
 
@@ -45,7 +44,6 @@ export class TelegramService {
         throw new Error('Failed to set bot commands');
       }
 
-      // Set up webhook for /start command
       this.handleStartCommand();
 
     } catch (error) {
@@ -67,7 +65,6 @@ export class TelegramService {
 
       const updates = await response.json();
       
-      // Check for /start commands and respond
       for (const update of updates.result) {
         if (update.message?.text === '/start') {
           await this.sendMessage(`ברוך הבא לבוט מוצרי הטכנולוגיה! 🚀\n\nאני אחפש ואפרסם מוצרי טכנולוגיה במבצע מ-AliExpress.\n\nהמוצרים יפורסמו אוטומטית בקבוצה כל 10 דקות.`);
@@ -79,29 +76,45 @@ export class TelegramService {
     }
   }
 
-  static async sendMessage(message: string): Promise<void> {
+  static async sendMessage(message: string, imageUrl?: string): Promise<void> {
     if (!this.botToken || !this.groupId) {
       throw new Error("Bot token and group ID are required");
     }
 
     try {
-      const response = await fetch(
-        `https://api.telegram.org/bot${this.botToken}/sendMessage`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            chat_id: this.groupId,
-            text: message,
-            parse_mode: "HTML",
-          }),
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to send message");
+      // אם יש תמונה, שלח אותה עם הכיתוב
+      if (imageUrl) {
+        await fetch(
+          `https://api.telegram.org/bot${this.botToken}/sendPhoto`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              chat_id: this.groupId,
+              photo: imageUrl,
+              caption: message,
+              parse_mode: "HTML",
+            }),
+          }
+        );
+      } else {
+        // אם אין תמונה, שלח רק טקסט
+        await fetch(
+          `https://api.telegram.org/bot${this.botToken}/sendMessage`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              chat_id: this.groupId,
+              text: message,
+              parse_mode: "HTML",
+            }),
+          }
+        );
       }
     } catch (error) {
       console.error("Error sending message:", error);
