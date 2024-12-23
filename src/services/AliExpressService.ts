@@ -22,11 +22,16 @@ export class AliExpressService {
   }
 
   static formatProductMessage(product: Product): string {
+    const affiliateLink = localStorage.getItem("affiliateLink");
+    const productUrlWithAffiliate = affiliateLink 
+      ? `${product.productUrl}?${affiliateLink}`
+      : product.productUrl;
+
     return `
 🔥 <b>${product.title}</b>
 
-💰 Price: ${product.price}
-🛒 <a href="${product.productUrl}">Buy Now</a>
+💰 מחיר: ${product.price}
+🛒 <a href="${productUrlWithAffiliate}">לרכישה</a>
 
 #TechDeals #AliExpress
     `.trim();
